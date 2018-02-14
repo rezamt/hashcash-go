@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"math/big"
 	"time"
+	"flag"
 )
 
 func IntToHex(num uint64) []byte {
@@ -33,12 +34,15 @@ type Block struct {
 }
  */
 
-const targetBits = 16
+const targetBits = 4 // 4 zero
 
 func main() {
 
-	blockData := make([]byte, 100)
+	var complexity = flag.Int("complexity", targetBits, "network complexity e.g. default: 4 means hash must start with 0000")
 
+	flag.Parse()
+
+	blockData := make([]byte, 100)
 
 	if _, err := rand.Read(blockData); err != nil {
 		log.Fatalln("Random Token Generator failed")
@@ -47,9 +51,7 @@ func main() {
 	sha_256 := sha256.New()
 
 	target := big.NewInt(1)
-	target.Lsh(target, uint(256-targetBits))
-
-
+	target.Lsh(target, uint(256 - (*complexity * 4)))
 
 	var nonce uint64 = 0
 
@@ -57,7 +59,7 @@ func main() {
 
 	for {
 
-		data := bytes.Join([][]byte{IntToHex(nonce), blockData}, []byte{}) // append(nonce, token...)
+		data := bytes.Join([][]byte{IntToHex(nonce), blockData}, []byte{}) // atl we could use: append(nonce, token...)
 
 		sha_256.Write([]byte(data))
 
@@ -74,8 +76,9 @@ func main() {
 			fmt.Printf("\nBlock Data:\t%X", blockData)
 			fmt.Printf("\nHash:\t%X", hash)
 			fmt.Printf("\nNonce:\t%v", nonce)
+			fmt.Printf("\nComplexity:\t%v", *complexity)
 
-			fmt.Printf("\nHashing time:\t%.3f\n\r sec", now.Sub(before).Seconds())
+			fmt.Printf("\nHashing time:\t%.3f sec\n\r", now.Sub(before).Seconds())
 			break
 		} else {
 			nonce++
