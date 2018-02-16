@@ -67,7 +67,7 @@ func main() {
 
 		hash := sha_256.Sum(nil)
 
-		fmt.Printf("\rHashing: %x", hash)
+		fmt.Printf("\rNonce: %v\tHashing: %x", nonce, hash)
 
 		hashInt.SetBytes(hash[:])
 
